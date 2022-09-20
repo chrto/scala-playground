@@ -1,15 +1,16 @@
 package chrto.typeClasses.JsonSerializer
 
 import org.scalatest.wordspec.AnyWordSpec
+import chrto.dataTypes.JSONValue.JSONValue
 import chrto.dataTypes.JSONValue.JSONString
 import chrto.dataTypes.JSONValue.JSONArray
 import chrto.dataTypes.JSONValue.JSONNumber
 import chrto.dataTypes.JSONValue.JSONObject
+import chrto.dataTypes.JSONValue.JSONDate
 import chrto.model.User
 import chrto.model.Post
 import chrto.model.Feed
 import java.util.Date
-import chrto.dataTypes.JSONValue.JSONValue
 
 class JsonSerializerTest extends AnyWordSpec {
   "JSON Serializer" when {
@@ -46,6 +47,42 @@ class JsonSerializerTest extends AnyWordSpec {
       "return exact string representation (TypeEnrichment)" in {
         import chrto.typeClasses.JsonSerializer.TypeEnrichment.JsonSerializerEnrichment
         assert(v.toJson.stringify === s""""$expected"""")
+      }
+    }
+
+    "serialize Date value" should {
+      import chrto.typeClasses.JsonSerializer.JsonSerializerImplicitInstancies.DateSerializer
+      val date: Date = new Date(2022, 8, 20)
+      val expected: Date = new Date(2022, 8, 20)
+
+      "return exact JSON value (Type Class Instance)" in {
+        assert(
+          DateSerializer.serialize(date) match {
+            case JSONDate(value) if value === expected => true
+            case value =>
+              fail(
+                s"'$value' has not been expected. Expected value: '${JSONDate(expected)}'"
+              )
+          }
+        )
+      }
+
+      "return exact JSON value (TypeEnrichment)" in {
+        import chrto.typeClasses.JsonSerializer.TypeEnrichment.JsonSerializerEnrichment
+        assert(
+          date.toJson match {
+            case JSONDate(value) if value === expected => true
+            case value =>
+              fail(
+                s"'$value' has not been expected. Expected value: '${JSONDate(expected)}'"
+              )
+          }
+        )
+      }
+
+      "return exact string representation (TypeEnrichment)" in {
+        import chrto.typeClasses.JsonSerializer.TypeEnrichment.JsonSerializerEnrichment
+        assert(date.toJson.stringify === s"\"${expected.toString()}\"")
       }
     }
 
@@ -127,10 +164,10 @@ class JsonSerializerTest extends AnyWordSpec {
 
     "serialize Post value" should {
       import chrto.typeClasses.JsonSerializer.JsonSerializerImplicitInstancies.PostSerializer
-      val post: Post = new Post("some content", new Date(2022, 9, 20))
+      val post: Post = new Post("some content", new Date(2022, 8, 20))
       val expected: Map[String, JSONValue] = Map(
         "content" -> new JSONString("some content"),
-        "createdAt" -> new JSONString(new Date(2022, 9, 20).toString())
+        "createdAt" -> new JSONDate(new Date(2022, 8, 20))
       )
       "return exact JSON value (Type Class Instance)" in {
         assert(
@@ -170,7 +207,7 @@ class JsonSerializerTest extends AnyWordSpec {
       import chrto.typeClasses.JsonSerializer.JsonSerializerImplicitInstancies.FeedSerializer
       val feed: Feed = new Feed(
         new User("Joe", 23, "joe@c.com"),
-        List(new Post("some content", new Date(2022, 9, 20)))
+        List(new Post("some content", new Date(2022, 8, 20)))
       )
       val expectedUser: Map[String, JSONValue] = Map(
         "name" -> new JSONString("Joe"),
@@ -179,7 +216,7 @@ class JsonSerializerTest extends AnyWordSpec {
       )
       val expectedPost: Map[String, JSONValue] = Map(
         "content" -> new JSONString("some content"),
-        "createdAt" -> new JSONString(new Date(2022, 9, 20).toString())
+        "createdAt" -> new JSONDate(new Date(2022, 8, 20))
       )
       val expected: Map[String, JSONValue] = Map(
         "user" -> JSONObject(expectedUser),

@@ -5,9 +5,11 @@ import chrto.dataTypes.JSONValue.JSONString
 import chrto.dataTypes.JSONValue.JSONNumber
 import chrto.dataTypes.JSONValue.JSONArray
 import chrto.dataTypes.JSONValue.JSONObject
+import chrto.dataTypes.JSONValue.JSONDate
 import chrto.model.User
 import chrto.model.Post
 import chrto.model.Feed
+import java.util.Date
 
 // Type Class
 trait JsonSerializer[T] {
@@ -22,6 +24,9 @@ object JsonSerializerImplicitInstancies {
     override def serialize(value: String): JSONValue = JSONString(value)
   }
 
+  implicit object DateSerializer extends JsonSerializer[Date] {
+    override def serialize(value: Date): JSONValue = JSONDate(value)
+  }
 
   implicit object NumberSerializer extends JsonSerializer[Int] {
     override def serialize(value: Int): JSONValue = JSONNumber(value)
@@ -41,7 +46,7 @@ object JsonSerializerImplicitInstancies {
     override def serialize(post: Post): JSONValue = JSONObject(
       Map(
         "content" -> JSONString(post.content),
-        "createdAt" -> JSONString(post.createdAt.toString())
+        "createdAt" -> JSONDate(post.createdAt)
       )
     )
   }

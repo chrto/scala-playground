@@ -1,5 +1,7 @@
 package chrto.dataTypes.JSONValue
 
+import java.util.Date
+
 // intermediate data types
 sealed trait JSONValue {
   def stringify: String
@@ -7,6 +9,10 @@ sealed trait JSONValue {
 
 final case class JSONString(value: String) extends JSONValue {
   def stringify: String = s"\"$value\""
+}
+
+final case class JSONDate(value: Date) extends JSONValue {
+  def stringify: String = JSONString(value.toString()).stringify
 }
 
 final case class JSONNumber(value: Int) extends JSONValue {
